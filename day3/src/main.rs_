@@ -1,0 +1,75 @@
+// get line, break into array of ints
+// 
+use std::fs;
+
+fn main() {
+    const RADIX: usize = 10;
+    let data = get_data_for_day("3").unwrap();
+    let vec = data.lines().map(|s : &str | {
+        s.chars().map(|c| c.to_digit(RADIX.try_into().unwrap()).unwrap()).collect()
+    });
+    
+    let res = vec.clone().fold(vec![0,0,0,0,0], |mut acc: Vec<u32>, item: Vec<u32> | {
+        for (i, e) in item.iter().enumerate() {
+            acc[i] += e
+        }
+        acc
+    });
+    let mut gamma: Vec<&str> = vec![];
+    let mut episilon: Vec<&str> = vec![];
+
+    for (i, elem) in res.iter().enumerate() {
+
+        if elem >= &6 {
+            gamma.push("1");
+            episilon.push("0");
+        } else {
+            gamma.push("0");
+            episilon.push("1");
+        }
+
+    }
+    let mut omg: Vec<Vec<u32>> = vec.clone().collect();
+    // println!("{:#?}", x);
+    for (i, elem) in gamma.iter().enumerate() {
+        if omg.len() > 0 {
+            omg.retain(|y| y[i].to_string() == elem.to_string()); //198* 3899
+        }
+        println!("num of wtfs - {} digit - {} -- {:?}", omg.len(), elem, gamma)
+
+        // println!("{:?}", omg.clone().into_iter().map(|x: Vec<u32> | x[1] ));
+        // println!("{}", omg.len())
+
+    }
+
+    let mut wtf: Vec<Vec<u32>> = vec.clone().collect();
+
+
+    for (i, elem) in episilon.iter().enumerate() {
+        if (wtf.len() > 1) {
+            wtf.retain(|y| y[i].to_string() == elem.to_string());
+        }
+        // println!("num of wtfs - {} digit - {} -- {:?}", wtf.len(), elem, episilon)
+
+    }
+    println!("{:?} **** {:?}", omg, wtf);
+    // println!("{}-{}",  isize::from_str_radix(&x.concat(), 2).unwrap(), isize::from_str_radix(&episilon.concat(), 2).unwrap());
+
+    // println!("{}-{}",  isize::from_str_radix(&gamma.concat(), 2).unwrap(), isize::from_str_radix(&episilon.concat(), 2).unwrap());
+    
+}
+
+fn get_digit_at_index(vec: Vec<Vec<usize>>, index: usize) -> i8 {
+    let res: usize = vec.iter().map(|row| row[index]).fold(0, |acc, x| acc + x);
+    if res / vec.len() >= 1 { return 1 } else {return 0}
+}
+
+fn get_data_for_day(day: &str) -> Result<String, Box<dyn std::error::Error>> {
+    // let url = format!("https://adventofcode.com/2021/day/{}/input", day);
+    // let session: String = fs::read_to_string("../token").unwrap();
+    // let client = reqwest::blocking::Client::new();
+    // let body: String = client.get(url).header("cookie", format!("session={}", session)).send()?.text()?;
+    let filepath = "./src/data";
+    let body = fs::read_to_string(filepath).expect("Something went wrong reading the file");
+    Ok(body)
+}

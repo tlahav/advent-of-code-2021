@@ -44,7 +44,7 @@ fn get_overlapping(data: &String, ignore_diagonals: bool) -> usize {
     type Ground<'a> = HashMap<Point, usize>;
 
     let mut ground: Ground = HashMap::new();
-    lines.filter(|line| !line.is_diagonal() || !ignore_diagonals).for_each(|line| {
+    lines.filter(|line| !(line.is_diagonal() && ignore_diagonals)).for_each(|line| {
         for p in line.get_all_points_along() {
             let check_if_exists = ground.insert(p, 1);
             if check_if_exists != None {

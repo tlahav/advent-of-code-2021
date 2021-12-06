@@ -1,42 +1,30 @@
 use std::fs;
-
 const CROSSED: i32 = -999;
 fn main() {
     let (allboards, draw_numbers) = get_data();
-
-    // Part 1
-    let try_to_win = true;
-    let (winning_board, winning_number) = play_some_bingo(&allboards, &draw_numbers, try_to_win);
-    print_results(try_to_win, calculate_remainder(&winning_board), winning_number);
-   
-    // Part 2
-    let try_to_win = false;
-    let (winning_board, winning_number) = play_some_bingo(&allboards, &draw_numbers, try_to_win);
-    print_results(try_to_win, calculate_remainder(&winning_board), winning_number);
+    
+    vec![true,false].iter().for_each(|try_to_win| {
+        let (winning_board, winning_number) = play_some_bingo(&allboards, &draw_numbers, try_to_win);
+        print_results(try_to_win, calculate_remainder(&winning_board), winning_number);
+    })
 }
-
-fn play_some_bingo(allboards: &Vec<Vec<i32>>, draw_numbers: &Vec<i32>, try_to_win: bool) -> (Vec<i32>, i32) {
+fn play_some_bingo(allboards: &Vec<Vec<i32>>, draw_numbers: &Vec<i32>, try_to_win: &bool) -> (Vec<i32>, i32) {
+    let mut boards_clone = allboards.clone();
+    let mut draw_numbers_clone = draw_numbers.clone();
     let mut winner_found = false;
-    let mut copy_boards = allboards.clone();
-    let mut copy_of_draw_numbers = draw_numbers.clone();
-
     let mut winning_board: Vec<i32> = vec![0];
     let mut winning_number: i32 = 0;
-    while copy_of_draw_numbers.len() > 0 && (!winner_found || !try_to_win) {
-        let drawn_number: i32 = copy_of_draw_numbers.pop().unwrap();
-        copy_boards = copy_boards.iter()
-            .map(|e| {
-                let new = cross_off_number_from(&e, drawn_number);
+    while draw_numbers_clone.len() > 0 && (!winner_found || !try_to_win) {
+        let drawn_number: i32 = draw_numbers_clone.pop().unwrap();
+        boards_clone = boards_clone.iter().map(|a_board| {
+                let new = cross_off_number_from(&a_board, drawn_number);
                 if check_for_winning_condition(&new) {
                     winning_number = drawn_number;
                     winner_found = true;
                     winning_board = new.to_vec();
                 }
-                new
-            }).collect();
-        if !try_to_win {
-            copy_boards.retain(|x|!check_for_winning_condition(&x));
-        }
+                new }).collect();
+        if !try_to_win { boards_clone.retain(|x| !check_for_winning_condition(&x)); }
     }
     (winning_board, winning_number)
 }
@@ -47,14 +35,9 @@ fn check_for_winning_condition(board: &Vec<i32>) -> bool {
         let mut horz_slice: Vec<i32> = board[e * 5..e * 5 + 5].to_vec();
         horz_slice.retain(|&x| x != CROSSED);
 
-        let mut vert_slice: Vec<i32> = vec![
-            board[e + 5 * 0],
-            board[e + 5 * 1],
-            board[e + 5 * 2],
-            board[e + 5 * 3],
-            board[e + 5 * 4],
-        ];
+        let mut vert_slice: Vec<i32> = board.iter().skip(e).step_by(5).copied().collect();
         vert_slice.retain(|&x| x != CROSSED);
+
         if vert_slice.is_empty() || horz_slice.is_empty() {
             winner = true
         }
@@ -79,12 +62,12 @@ fn cross_off_number_from(board: &Vec<i32>, number: i32) -> Vec<i32> {
 }
 
 fn get_data() -> (Vec<Vec<i32>>, Vec<i32>) {
-    let _draw_numbers: String = get_data_from_file("./src/testnumbers").unwrap();
+    let _draw_numbers: String = get_data_from_file("./src/numbers").unwrap();
     let draw_numbers: Vec<i32> = _draw_numbers.split(',')
         .map(|e| e.parse::<i32>().unwrap())
         .rev()
         .collect();
-    let boards: String = get_data_from_file("./src/testboards").unwrap();
+    let boards: String = get_data_from_file("./src/boards").unwrap();
     let allboards: Vec<Vec<i32>> = boards
         .split("\n\n")
         .map(|e| {
@@ -106,9 +89,9 @@ fn get_data_from_file(filepath: &str) -> Result<String, Box<dyn std::error::Erro
     Ok(body)
 }
 
-fn print_results(try_to_win: bool, sum_of_unmarked: i32, winning_number: i32) {
-    println!("Results when I'm{}trying to win is: {}", 
-        if try_to_win { " " } else { " NOT "},
+fn print_results(try_to_win: &bool, sum_of_unmarked: i32, winning_number: i32) {
+    println!("Result when I'm{}trying to win: {}", 
+        if *try_to_win { " " } else { " NOT "},
         sum_of_unmarked * winning_number,
     );
 }

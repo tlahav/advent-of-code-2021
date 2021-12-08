@@ -1,6 +1,14 @@
 use std::fs;
 const CROSSED: i32 = -999;
+
+fn donothing(somevar: &Vec<i32>) {
+    println!("do nothing");
+}
 fn main() {
+    let y = vec![1,2,3,4,5];
+    donothing(&y);
+    println!("{:?}", y);
+
     let (allboards, draw_numbers) = get_data();
     
     vec![true,false].iter().for_each(|try_to_win| {
